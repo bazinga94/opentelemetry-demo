@@ -32,9 +32,13 @@ jobs:
         run: |
           services=$(ls src)
           for service in $services; do
-            if [ -f "src/$service/Dockerfile" ]; then
+            DOCKERFILE=src/$service/Dockerfile
+            if [ -f "$DOCKERFILE" ]; then
               echo "🔨 Building $service"
-              docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$service-$IMAGE_TAG ./src/$service
+              docker build \
+                -f $DOCKERFILE \
+                -t $ECR_REGISTRY/$ECR_REPOSITORY:$service-$IMAGE_TAG \
+                .
               echo "🚀 Pushing $service"
               docker push $ECR_REGISTRY/$ECR_REPOSITORY:$service-$IMAGE_TAG
             else
