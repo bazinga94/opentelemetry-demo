@@ -1,0 +1,88 @@
+# Source: opentelemetry-demo/charts/grafana/templates/clusterrolebinding.yaml
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: grafana-clusterrolebinding
+  labels:
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: opentelemetry-demo
+    app.kubernetes.io/version: "11.5.2"
+subjects:
+  - kind: ServiceAccount
+    name: grafana
+    namespace: otel-demo
+roleRef:
+  kind: ClusterRole
+  name: grafana-clusterrole
+  apiGroup: rbac.authorization.k8s.io
+---
+# Source: opentelemetry-demo/charts/opentelemetry-collector/templates/clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: otel-collector
+  labels:
+    app.kubernetes.io/name: opentelemetry-collector
+    app.kubernetes.io/instance: opentelemetry-demo
+    app.kubernetes.io/version: "0.120.0"
+    app.kubernetes.io/component: standalone-collector
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: otel-collector
+subjects:
+- kind: ServiceAccount
+  name: otel-collector
+  namespace: otel-demo
+---
+# Source: opentelemetry-demo/charts/prometheus/templates/clusterrolebinding-arbaaz.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/component: server
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/instance: opentelemetry-demo
+    app.kubernetes.io/version: v3.1.0
+    app.kubernetes.io/part-of: prometheus
+  name: prometheus
+subjects:
+  - kind: ServiceAccount
+    name: prometheus
+    namespace: otel-demo
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: prometheus
+---
+# Source: opentelemetry-demo/charts/grafana/templates/role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: grafana
+  namespace: otel-demo
+  labels:
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: opentelemetry-demo
+    app.kubernetes.io/version: "11.5.2"
+rules: []
+---
+# Source: opentelemetry-demo/charts/grafana/templates/rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: grafana
+  namespace: otel-demo
+  labels:
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: opentelemetry-demo
+    app.kubernetes.io/version: "11.5.2"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: grafana
+subjects:
+- kind: ServiceAccount
+  name: grafana
+  namespace: otel-demo
+---
