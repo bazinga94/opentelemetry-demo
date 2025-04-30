@@ -20,32 +20,17 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Login to Amazon ECR
+      - name: Log in to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build and Push All Service Images
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-          IMAGE_TAG: ${{ github.sha }}
+      - name: Set environment variables
         run: |
-          services=$(ls src)
-          for service in $services; do
-            if [ "$service" = "ad" ]; then
-              echo "⚠️ Skipping $service due to known issue"
-              continue
-            fi
-            DOCKERFILE=src/$service/Dockerfile
-            if [ -f "$DOCKERFILE" ]; then
-              echo "🔨 Building $service"
-              docker build \
-                -f $DOCKERFILE \
-                -t $ECR_REGISTRY/$ECR_REPOSITORY:$service-$IMAGE_TAG \
-                .
-              echo "🚀 Pushing $service"
-              docker push $ECR_REGISTRY/$ECR_REPOSITORY:$service-$IMAGE_TAG
-            else
-              echo "⚠️ Skipping $service (No Dockerfile)"
-            fi
-          done
+          echo "IMAGE_NAME=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}" >> .env
+          echo "DEMO_VERSION=${{ github.sha }}" >> .env
+
+      - name: Build all service images
+        run: docker compose --env-file .env build
+
+      - name: Push all service images
+        run: docker compose --env-file .env push
