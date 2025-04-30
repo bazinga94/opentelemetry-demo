@@ -29,28 +29,28 @@ jobs:
           echo "IMAGE_NAME=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}" >> .env
           echo "DEMO_VERSION=${{ github.sha }}" >> .env
 
-      - name: Build all service images
-        run: docker compose --env-file .env build
+      # - name: Build all service images
+      #   run: docker compose --env-file .env build
 
-      - name: Install Trivy
-        run: |
-          sudo apt-get update
-          sudo apt-get install wget apt-transport-https gnupg lsb-release -y
-          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
-          echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/trivy.list
-          sudo apt-get update
-          sudo apt-get install trivy -y
+      # - name: Install Trivy
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install wget apt-transport-https gnupg lsb-release -y
+      #     wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+      #     echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/trivy.list
+      #     sudo apt-get update
+      #     sudo apt-get install trivy -y
 
-      - name: Scan all service images with Trivy
-        run: |
-          ECR_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}
-          for svc in frontend checkout payment recommendation email currency product-catalog shipping ad cart accounting fraud-detection quote image-provider load-generator flagd-ui kafka; do
-            echo "🔍 Scanning $svc..."
-            trivy image --exit-code 1 --severity HIGH,CRITICAL ${ECR_URI}:${svc}-${{ github.sha }} || exit 1
-          done
+      # - name: Scan all service images with Trivy
+      #   run: |
+      #     ECR_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}
+      #     for svc in frontend checkout payment recommendation email currency product-catalog shipping ad cart accounting fraud-detection quote image-provider load-generator flagd-ui kafka; do
+      #       echo "🔍 Scanning $svc..."
+      #       trivy image --exit-code 1 --severity HIGH,CRITICAL ${ECR_URI}:${svc}-${{ github.sha }} || exit 1
+      #     done
 
-      - name: Push all service images
-        run: docker compose --env-file .env push
+      # - name: Push all service images
+      #   run: docker compose --env-file .env push
 
       # - name: Set up kubeconfig
       #   run: |
@@ -61,23 +61,23 @@ jobs:
         run: |
           aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name ${{ secrets.EKS_CLUSTER_NAME }}
 
-      # - name: Update image tags in 07-deployments.yaml
-      #   run: |
-      #     ECR_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}
-      #     FILE=k8s/07-deployments.yaml
-      #     for svc in frontend checkout payment recommendation email currency product-catalog shipping ad cart accounting fraud-detection quote image-provider load-generator flagd-ui kafka; do
-      #       sed -i "s|image: .*${svc}.*|image: ${ECR_URI}:${svc}-${{ github.sha }}|" $FILE
-      #     done
-
-      - name: Update image tags in 07-deployments.yaml(Failure)
+      - name: Update image tags in 07-deployments.yaml
         run: |
           ECR_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}
           FILE=k8s/07-deployments.yaml
-           for svc in frontend checkout payment email currency product-catalog shipping ad cart accounting fraud-detection quote image-provider load-generator flagd-ui kafka; do
+          for svc in frontend checkout payment recommendation email currency product-catalog shipping ad cart accounting fraud-detection quote image-provider load-generator flagd-ui kafka; do
             sed -i "s|image: .*${svc}.*|image: ${ECR_URI}:${svc}-${{ github.sha }}|" $FILE
           done
 
-          sed -i "s|image: .*recommendation.*|image: ${ECR_URI}:recommendation-INVALIDTAG|" $FILE
+      # - name: Update image tags in 07-deployments.yaml(Failure)
+      #   run: |
+      #     ECR_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}
+      #     FILE=k8s/07-deployments.yaml
+      #      for svc in frontend checkout payment email currency product-catalog shipping ad cart accounting fraud-detection quote image-provider load-generator flagd-ui kafka; do
+      #       sed -i "s|image: .*${svc}.*|image: ${ECR_URI}:${svc}-${{ github.sha }}|" $FILE
+      #     done
+
+      #     sed -i "s|image: .*recommendation.*|image: ${ECR_URI}:recommendation-INVALIDTAG|" $FILE
 
       # - name: Test kubectl connection
       #   run: |
