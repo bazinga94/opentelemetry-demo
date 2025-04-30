@@ -35,9 +35,14 @@ jobs:
       # - name: Push all service images
       #   run: docker compose --env-file .env push
 
-      - name: Update kubeconfig
+      - name: Set up kubeconfig
         run: |
-          aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name ${{ secrets.EKS_CLUSTER_NAME }}
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 --decode > ~/.kube/config
+
+      # - name: Update kubeconfig
+      #   run: |
+      #     aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name ${{ secrets.EKS_CLUSTER_NAME }}
 
       - name: Update image tags in 07-deployments.yaml
         run: |
