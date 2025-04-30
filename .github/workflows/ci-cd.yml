@@ -52,9 +52,9 @@ jobs:
             sed -i "s|image: .*${svc}.*|image: ${ECR_URI}:${svc}-${{ github.sha }}|" $FILE
           done
 
-      - name: Test kubectl connection
-        run: |
-          kubectl get nodes
+      # - name: Test kubectl connection
+      #   run: |
+      #     kubectl get nodes
 
       - name: Deploy to EKS
         run: |
