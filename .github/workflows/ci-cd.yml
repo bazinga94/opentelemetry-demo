@@ -56,6 +56,10 @@ jobs:
       #   run: |
       #     kubectl get nodes
 
+      - name: Creating namespace
+        run: |
+          kubectl apply -f k8s/01-namespace.yaml
+
       - name: Deploy to EKS
         run: |
           kubectl apply -f k8s/
