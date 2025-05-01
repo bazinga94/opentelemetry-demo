@@ -49,7 +49,7 @@ jobs:
           ECR_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}
           for svc in frontend checkout payment recommendation email currency product-catalog shipping ad cart accounting fraud-detection quote image-provider load-generator flagd-ui kafka; do
             echo "🔍 Scanning $svc..."
-            trivy image --exit-code 1 --severity HIGH,CRITICAL ${ECR_URI}:${svc}-${{ github.sha }} || exit 1
+            trivy image --exit-code 1 --severity HIGH,CRITICAL ${ECR_URI}:${{ github.sha }}-${svc} || exit 1
           done
 
       # - name: Set up kubeconfig
