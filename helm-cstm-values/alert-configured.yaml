@@ -1,0 +1,74 @@
+# no remote write
+prometheus:
+
+  alertmanager:
+    enabled: true
+    persistence:
+      enabled: true
+      storageClass: "gp2"
+      size: 1Gi
+
+    config:
+      route:
+        receiver: 'Mail Alert'
+        repeat_interval: 30s
+        group_wait: 15s
+        group_interval: 15s
+
+      receivers:
+        - name: 'Mail Alert'
+          email_configs:
+            - smarthost: 'smtp.gmail.com:587'
+              auth_username: 'arbazij@gmail.com'
+              auth_password: "ombk pjrx fjqk ryec" # deleted create a new auth pass for demonstration
+              from: 'arbazij@gmail.com'
+              to: 'arbaazij2916@gmail.com'
+              headers:
+                subject: 'Pod stuck in restart state'
+      
+  kube-state-metrics:
+    enabled: true
+
+  prometheus-node-exporter:
+    enabled: true
+
+  prometheus-pushgateway:
+    enabled: true
+
+  configmapReload:
+    prometheus:
+      enabled: true
+
+  serviceAccounts:
+      server:
+          name: "prometheus"
+          annotations:
+              pods.eks.amazonaws.com/role-arn: "arn:aws:iam::588738579349:role/eks-pod-identity-prometheus"
+  
+    
+  
+  serverFiles:
+
+    # server:
+    #   remoteWrite:
+    #       - url: https://aps-workspaces.us-east-1.amazonaws.com/workspaces/ws-5d48a934-cc43-4f7c-8037-62d9f8351903/api/v1/remote_write
+    #         sigv4:
+    #           region: us-east-1
+    #         queue_config:
+    #           max_samples_per_send: 1000
+    #           max_shards: 200
+    #           capacity: 2500
+
+    alerting_rules.yml: 
+      groups:
+      - name: PodRestarts
+        rules:
+        - alert: PodsRestartTresholdExceeded
+          expr: increase(kube_pod_container_status_restarts_total[5m]) > 3
+          for: 1m
+          labels:
+            severity: CRITICAL
+          annotations:
+            host: "{{ $labels.instance }}"
+            summary: "Pod Restart threshold exceeded"
+            description: "Pod {{ $labels.container }} in namespace {{ $labels.namespace }} has restarted more than 3 times in the last 5 minutes."

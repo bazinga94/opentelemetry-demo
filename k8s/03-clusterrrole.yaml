@@ -1,14 +1,14 @@
-# ---
-# # Source: opentelemetry-demo/charts/grafana/templates/clusterrole.yaml
-# kind: ClusterRole
-# apiVersion: rbac.authorization.k8s.io/v1
-# metadata:
-#   labels:
-#     app.kubernetes.io/name: grafana
-#     app.kubernetes.io/instance: opentelemetry-demo
-#     app.kubernetes.io/version: "11.5.2"
-#   name: grafana-clusterrole
-# rules: []
+---
+# Source: opentelemetry-demo/charts/grafana/templates/clusterrole.yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  labels:
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: opentelemetry-demo
+    app.kubernetes.io/version: "11.5.2"
+  name: grafana-clusterrole
+rules: []
 ---
 # Source: opentelemetry-demo/charts/opentelemetry-collector/templates/clusterrole.yaml
 apiVersion: rbac.authorization.k8s.io/v1

@@ -1,0 +1,113 @@
+#pv claim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: alertmanager-ebs-pvc
+  namespace: otel-demo
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: gp2
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alertmanager
+  namespace: otel-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alertmanager
+  template:
+    metadata:
+      labels:
+        app: alertmanager
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+      - name: alertmanager
+        image: prom/alertmanager:latest
+        args:
+          - '--config.file=/etc/alertmanager/config.yml'
+          - '--storage.path=/alertmanager'
+        ports:
+        - name: alertmanager
+          containerPort: 9093
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/alertmanager
+        - name: alertmanager
+          mountPath: /alertmanager
+        - name: secret-volume
+          mountPath: /etc/secrets
+          readOnly: true
+      volumes:
+      - name: config-volume
+        configMap:
+          name: alertmanager
+      - name: alertmanager
+        persistentVolumeClaim:
+          claimName: alertmanager-ebs-pvc
+      - name: secret-volume
+        secret:
+          secretName: alertmanager-secret
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: alertmanager-secret
+  namespace: otel-demo
+type: Opaque
+stringData:
+  smtp_password: "ombk pjrx fjqk ryec"
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: alertmanager
+  namespace: otel-demo
+data:
+    config.yml: |-
+      global:
+        smtp_smarthost: 'smtp.gmail.com:587'
+        smtp_from: 'arbazij@gmail.com'
+        smtp_auth_username: 'arbazij@gmail.com'
+        smtp_auth_password_file: '/etc/secrets/smtp_password'
+
+      route:
+        receiver: 'Mail Alert'
+        repeat_interval: 30s
+        group_wait: 15s
+        group_interval: 15s
+
+      receivers:
+        - name: 'Mail Alert'
+          email_configs:
+            - to: 'arbaazij2916@gmail.com'
+              headers:
+                subject: 'Pod stuck in restart state'
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    prometheus.io/scrape: 'true'
+    prometheus.io/path: '/alertmanager/metrics'
+  labels:
+    name: alertmanager
+  name: alertmanager
+  namespace: otel-demo
+spec:
+  selector:
+    app: alertmanager
+  #type: NodePort
+  ports:
+  - name: alertmanager
+    protocol: TCP
+    port: 9093
+    targetPort: 9093

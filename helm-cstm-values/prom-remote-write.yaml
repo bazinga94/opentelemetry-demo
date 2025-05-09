@@ -1,0 +1,21 @@
+#remote write
+
+prometheus:
+   
+  kube-state-metrics:
+    enabled: true
+
+  serviceAccounts:
+      server:
+          name: "prometheus"
+          annotations:
+              pods.eks.amazonaws.com/role-arn: "arn:aws:iam::588738579349:role/eks-pod-identity-prometheus"
+  server:
+      remoteWrite:
+          - url: https://aps-workspaces.us-east-1.amazonaws.com/workspaces/ws-d11112dd-207b-47f2-81ef-b39caa375755/api/v1/remote_write #change here
+            sigv4:
+              region: us-east-1
+            queue_config:
+              max_samples_per_send: 1000
+              max_shards: 200
+              capacity: 2500

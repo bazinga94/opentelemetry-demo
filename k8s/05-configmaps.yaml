@@ -162,21 +162,6 @@ data:
       spanmetrics: {}
     exporters:
       debug: {}
-      pipelines:
-        metrics:
-          exporters:
-            - prometheusremotewrite
-            - debug
-          processors:
-            - k8sattributes
-            - memory_limiter
-            - resource
-            - batch
-          receivers:
-            - otlp
-            - httpcheck/frontend-proxy
-            - redis
-            - spanmetrics
       opensearch:
         http:
           endpoint: http://opensearch:9200
@@ -184,7 +169,7 @@ data:
             insecure: true
         logs_index: otel
       otlp:
-        endpoint: jaeger-collector.default.svc.cluster.local:4317
+        endpoint: jaeger-collector:4317
         tls:
           insecure: true
       otlphttp/prometheus:
@@ -267,7 +252,7 @@ data:
               - ${env:MY_POD_IP}:8888
       redis:
         collection_interval: 10s
-        endpoint: valkey-cart.default.svc.cluster.local:6379
+        endpoint: valkey-cart:6379
       zipkin:
         endpoint: ${env:MY_POD_IP}:9411
     service:
@@ -342,11 +327,28 @@ metadata:
   namespace: otel-demo
 data:
   allow-snippet-annotations: "false"
+
   alerting_rules.yml: |
-    {}
+    groups:
+      - name: PodRestarts
+        rules:
+        - alert: PodsRestartTresholdExceeded
+          expr: increase(kube_pod_container_status_restarts_total[5m]) > 3
+          for: 1m
+          labels:
+            severity: CRITICAL
+          annotations:
+            host: "{{ $labels.instance }}"
+            summary: "Pod Restart threshold exceeded"
+            description: "Pod {{ $labels.container }} in namespace {{ $labels.namespace }} has restarted more than 3 times in the last 5 minutes."
   alerts: |
     {}
   prometheus.yml: |
+    alerting:
+      alertmanagers:
+      - static_configs:
+        - targets:
+          - "alertmanager:9093"
     global:
       evaluation_interval: 30s
       scrape_interval: 5s
@@ -360,7 +362,27 @@ data:
     - /etc/config/rules
     - /etc/config/alerts
     scrape_configs:
-    - job_name: prometheus
+    - job_name: 'kube-state-metrics'
+      kubernetes_sd_configs:
+        - role: endpoints
+      relabel_configs:
+        - source_labels: [__meta_kubernetes_service_label_app_kubernetes_io_name]
+          action: keep
+          regex: kube-state-metrics
+        - source_labels: [__meta_kubernetes_namespace]
+          action: keep
+          regex: kube-system|default|otel-demo 
+    - job_name: 'alertmanager'
+      kubernetes_sd_configs:
+        - role: endpoints
+      relabel_configs:
+        - source_labels: [__meta_kubernetes_service_label_app]
+          action: keep
+          regex: alertmanager
+        - source_labels: [__meta_kubernetes_namespace]
+          action: keep
+          regex: monitoring 
+    - job_name: prometheus|kube-system|default|otel-demo 
       static_configs:
       - targets:
         - localhost:9090
