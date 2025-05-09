@@ -27,7 +27,7 @@ jobs:
       - name: Set environment variables
         run: |
           echo "IMAGE_NAME=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}" >> .env
-          echo "DEMO_VERSION=${{ github.sha }}" >> .env
+          echo "DEMO_VERSION=${{ github.run_number }}" >> .env
 
       - name: Build all service images
         run: docker compose --env-file .env build
@@ -47,9 +47,11 @@ jobs:
       - name: Scan all service images with Trivy
         run: |
           ECR_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}
+          VERSION=${{ github.run_number }}
           for svc in frontend checkout payment recommendation email currency product-catalog shipping ad cart accounting fraud-detection quote image-provider load-generator flagd-ui kafka; do
             echo "🔍 Scanning $svc..."
-            trivy image --exit-code 0 --severity HIGH,CRITICAL ${ECR_URI}:${{ github.sha }}-${svc}
+            IMAGE=${ECR_URI}:${svc}-${VERSION}
+            trivy image --exit-code 0 --severity HIGH,CRITICAL $IMAGE
           done
 
       # - name: Set up kubeconfig
@@ -63,10 +65,11 @@ jobs:
 
       - name: Update image tags in 07-deployments.yaml
         run: |
+          VERSION=${{ github.run_number }}
           ECR_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}
           FILE=k8s/07-deployments.yaml
           for svc in frontend checkout payment recommendation email currency product-catalog shipping ad cart accounting fraud-detection quote image-provider load-generator flagd-ui kafka; do
-            sed -i "s|image: .*${svc}.*|image: ${ECR_URI}:${svc}-${{ github.sha }}|" $FILE
+            sed -i "s|image: .*${svc}.*|image: ${ECR_URI}-${svc}:${VERSION}|" $FILE
           done
 
       # - name: Update image tags in 07-deployments.yaml(Failure)
