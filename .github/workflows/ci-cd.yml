@@ -69,7 +69,7 @@ jobs:
           ECR_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}
           FILE=k8s/07-deployments.yaml
           for svc in frontend checkout payment recommendation email currency product-catalog shipping ad cart accounting fraud-detection quote image-provider load-generator flagd-ui kafka; do
-            sed -i "s|image: .*${svc}.*|image: ${ECR_URI}-${svc}:${VERSION}|" $FILE
+            sed -i "s|image: .*${svc}.*|image: ${ECR_URI}:${svc}-${VERSION}|" $FILE
           done
 
       # - name: Update image tags in 07-deployments.yaml(Failure)
@@ -81,10 +81,6 @@ jobs:
       #     done
 
       #     sed -i "s|image: .*recommendation.*|image: ${ECR_URI}:recommendation-INVALIDTAG|" $FILE
-
-      # - name: Test kubectl connection
-      #   run: |
-      #     kubectl get nodes
 
       - name: Creating namespace
         run: |
