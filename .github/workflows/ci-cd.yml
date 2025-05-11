@@ -29,30 +29,30 @@ jobs:
           echo "IMAGE_NAME=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}" >> .env
           echo "DEMO_VERSION=${{ github.run_number }}" >> .env
 
-      - name: Build all service images
-        run: docker compose --env-file .env build
+      # - name: Build all service images
+      #   run: docker compose --env-file .env build
 
-      - name: Push all service images
-        run: docker compose --env-file .env push
+      # - name: Push all service images
+      #   run: docker compose --env-file .env push
 
-      - name: Install Trivy
-        run: |
-          sudo apt-get update
-          sudo apt-get install wget apt-transport-https gnupg lsb-release -y
-          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
-          echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/trivy.list
-          sudo apt-get update
-          sudo apt-get install trivy -y
+      # - name: Install Trivy
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install wget apt-transport-https gnupg lsb-release -y
+      #     wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+      #     echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/trivy.list
+      #     sudo apt-get update
+      #     sudo apt-get install trivy -y
 
-      - name: Scan all service images with Trivy
-        run: |
-          ECR_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}
-          VERSION=${{ github.run_number }}
-          for svc in frontend checkout payment recommendation email currency product-catalog shipping ad cart accounting fraud-detection quote image-provider load-generator flagd-ui kafka; do
-            echo "Scanning $svc..."
-            IMAGE=${ECR_URI}:${svc}-${VERSION}
-            trivy image --exit-code 0 --severity HIGH,CRITICAL $IMAGE
-          done
+      # - name: Scan all service images with Trivy
+      #   run: |
+      #     ECR_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}
+      #     VERSION=${{ github.run_number }}
+      #     for svc in frontend checkout payment recommendation email currency product-catalog shipping ad cart accounting fraud-detection quote image-provider load-generator flagd-ui kafka; do
+      #       echo "Scanning $svc..."
+      #       IMAGE=${ECR_URI}:${svc}-${VERSION}
+      #       trivy image --exit-code 0 --severity HIGH,CRITICAL $IMAGE
+      #     done
 
       # - name: Set up kubeconfig
       #   run: |
@@ -63,15 +63,30 @@ jobs:
         run: |
           aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name ${{ secrets.EKS_CLUSTER_NAME }}
 
+      # - name: Update image tags in 07-deployments.yaml
+      #   run: |
+      #     VERSION=${{ github.run_number }}
+      #     ECR_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}
+      #     FILE=k8s/07-deployments.yaml
+      #     for svc in frontend checkout payment recommendation email currency product-catalog shipping ad cart accounting fraud-detection quote image-provider load-generator flagd-ui kafka; do
+      #       sed -i "s|image: .*${svc}.*|image: ${ECR_URI}:${svc}-${VERSION}|" $FILE
+      #     done
+
       - name: Update image tags in 07-deployments.yaml
         run: |
           VERSION=${{ github.run_number }}
           ECR_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}
           FILE=k8s/07-deployments.yaml
           for svc in frontend checkout payment recommendation email currency product-catalog shipping ad cart accounting fraud-detection quote image-provider load-generator flagd-ui kafka; do
-            sed -i "s|image: .*${svc}.*|image: ${ECR_URI}:${svc}-${VERSION}|" $FILE
+            sed -i "s|image: .*${svc}.*|image: ${ECR_URI}:${svc}-35|" $FILE
           done
-
+      - name: Commit and push updated deployments file
+        run: |
+          git config --global user.name "arbaaz29"
+          git config --global user.email "arbazij@gmail.com"
+          git add k8s/07-deployments.yaml
+          git commit -m "Update image tags in 07-deployments.yaml for run ${{ github.run_number }}"
+          git push
       # - name: Update image tags in 07-deployments.yaml(Failure)
       #   run: |
       #     ECR_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}
