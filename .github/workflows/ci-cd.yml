@@ -77,7 +77,7 @@ jobs:
           VERSION=${{ github.run_number }}
           ECR_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}
           FILE=k8s/07-deployments.yaml
-          for svc in frontend checkout payment recommendation email currency product-catalog shipping ad cart accounting fraud-detection quote image-provider load-generator flagd-ui kafka; do
+          for svc in frontend-proxy product-catalog image-provider fraud-detection load-generator flagd-ui frontend checkout payment recommendation email currency shipping ad cart accounting quote kafka; do
             sed -i "s|image: .*${svc}.*|image: ${ECR_URI}:${svc}-35|" $FILE
           done
       - name: Commit and push updated deployments file
