@@ -346,7 +346,7 @@ services:
       - OTEL_COLLECTOR_PORT_GRPC
       - OTEL_COLLECTOR_PORT_HTTP
       - OTEL_RESOURCE_ATTRIBUTES
-      - OTEL_SERVICE_NAME=frontend-proxy
+      - OTEL_SERVICE_NAME=proxy-frontend
       - ENVOY_PORT
       - FLAGD_HOST
       - FLAGD_PORT
