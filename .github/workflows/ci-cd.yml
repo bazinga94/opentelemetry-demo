@@ -29,48 +29,42 @@ jobs:
           echo "IMAGE_NAME=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}" >> .env
           echo "DEMO_VERSION=${{ github.run_number }}" >> .env
 
-      # - name: Build all service images
-      #   run: docker compose --env-file .env build
+      - name: Build all service images
+        run: docker compose --env-file .env build
 
-      # - name: Push all service images
-      #   run: docker compose --env-file .env push
+      - name: Push all service images
+        run: docker compose --env-file .env push
 
-      # - name: Install Trivy
-      #   run: |
-      #     sudo apt-get update
-      #     sudo apt-get install wget apt-transport-https gnupg lsb-release -y
-      #     wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
-      #     echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/trivy.list
-      #     sudo apt-get update
-      #     sudo apt-get install trivy -y
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install wget apt-transport-https gnupg lsb-release -y
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install trivy -y
 
-      # - name: Scan all service images with Trivy
-      #   run: |
-      #     ECR_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}
-      #     VERSION=${{ github.run_number }}
-      #     for svc in frontend checkout payment recommendation email currency product-catalog shipping ad cart accounting fraud-detection quote image-provider load-generator flagd-ui kafka; do
-      #       echo "Scanning $svc..."
-      #       IMAGE=${ECR_URI}:${svc}-${VERSION}
-      #       trivy image --exit-code 0 --severity HIGH,CRITICAL $IMAGE
-      #     done
-
-      # - name: Set up kubeconfig
-      #   run: |
-      #     mkdir -p ~/.kube
-      #     echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 --decode > ~/.kube/config
-
+      - name: Scan all service images with Trivy
+        run: |
+          ECR_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}
+          VERSION=${{ github.run_number }}
+          for svc in frontend checkout payment recommendation email currency product-catalog shipping ad cart accounting fraud-detection quote image-provider load-generator flagd-ui kafka; do
+            echo "Scanning $svc..."
+            IMAGE=${ECR_URI}:${svc}-${VERSION}
+            trivy image --exit-code 0 --severity HIGH,CRITICAL $IMAGE
+          done
       - name: Update kubeconfig
         run: |
           aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name ${{ secrets.EKS_CLUSTER_NAME }}
 
-      # - name: Update image tags in 07-deployments.yaml
-      #   run: |
-      #     VERSION=${{ github.run_number }}
-      #     ECR_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}
-      #     FILE=k8s/07-deployments.yaml
-      #     for svc in frontend checkout payment recommendation email currency shipping ad cart accounting quote product-catalog image-provider fraud-detection flagd-ui kafka; do
-      #       sed -i "s|image: .*${svc}.*|image: ${ECR_URI}:${svc}-${VERSION}|" $FILE
-      #     done
+      - name: Update image tags in 07-deployments.yaml
+        run: |
+          VERSION=${{ github.run_number }}
+          ECR_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}
+          FILE=k8s/07-deployments.yaml
+          for svc in frontend checkout payment recommendation email currency shipping ad cart accounting quote product-catalog image-provider fraud-detection flagd-ui kafka; do
+            sed -i "s|image: .*${svc}.*|image: ${ECR_URI}:${svc}-${VERSION}|" $FILE
+          done
       
       - name: Update image tags in 12-prob-deployments.yaml
         run: |
@@ -78,7 +72,7 @@ jobs:
           ECR_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}
           FILE=k8s/12-prob-deployments.yaml
           for svc in load-generator; do
-            sed -i "s|image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:ad-38|image: ${ECR_URI}:load-generator-44|" $FILE
+            sed -i "s|image: .*load-generator.*|image: ${ECR_URI}:${svc}-${VERSION}|" $FILE
           done
 
       - name: Update image tags in 12-prob-deployments.yaml
@@ -87,7 +81,7 @@ jobs:
           ECR_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}
           FILE=k8s/12-prob-deployments.yaml
           for svc in proxy-frontend; do
-            sed -i "s|image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:frontend-38|image: ${ECR_URI}:${svc}-44|" $FILE
+            sed -i "s|image: .*proxy-frontend.*|image: ${ECR_URI}:${svc}-${VERSION}|" $FILE
           done
 
       - name: Commit and push updated deployments file
@@ -115,6 +109,10 @@ jobs:
       - name: Deploy to EKS
         run: |
           kubectl apply -f k8s/
+      
+      - name: Setup alerts and kubemetrics
+        run: |
+          kubectl apply -f k8s/kube-state/
 
       # Rollback
       - name: Rollback on failure
