@@ -29,11 +29,11 @@ jobs:
           echo "IMAGE_NAME=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}" >> .env
           echo "DEMO_VERSION=${{ github.run_number }}" >> .env
 
-      - name: Build all service images
-        run: docker compose --env-file .env build
+      # - name: Build all service images
+      #   run: docker compose --env-file .env build
 
-      - name: Push all service images
-        run: docker compose --env-file .env push
+      # - name: Push all service images
+      #   run: docker compose --env-file .env push
 
       # - name: Install Trivy
       #   run: |
@@ -63,22 +63,31 @@ jobs:
         run: |
           aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name ${{ secrets.EKS_CLUSTER_NAME }}
 
-      - name: Update image tags in 07-deployments.yaml
-        run: |
-          VERSION=${{ github.run_number }}
-          ECR_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}
-          FILE=k8s/07-deployments.yaml
-          for svc in frontend checkout payment recommendation email currency shipping ad cart accounting quote product-catalog image-provider fraud-detection flagd-ui kafka; do
-            sed -i "s|image: .*${svc}.*|image: ${ECR_URI}:${svc}-${VERSION}|" $FILE
-          done
+      # - name: Update image tags in 07-deployments.yaml
+      #   run: |
+      #     VERSION=${{ github.run_number }}
+      #     ECR_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}
+      #     FILE=k8s/07-deployments.yaml
+      #     for svc in frontend checkout payment recommendation email currency shipping ad cart accounting quote product-catalog image-provider fraud-detection flagd-ui kafka; do
+      #       sed -i "s|image: .*${svc}.*|image: ${ECR_URI}:${svc}-${VERSION}|" $FILE
+      #     done
       
+      # - name: Update image tags in 12-prob-deployments.yaml
+      #   run: |
+      #     VERSION=${{ github.run_number }}
+      #     ECR_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}
+      #     FILE=k8s/12-prob-deployments.yaml
+      #     for svc in proxy-frontend load-generator; do
+      #       sed -i "s|image: .*${svc}.*|image: ${ECR_URI}:${svc}-${VERSION}|" $FILE
+      #     done
+
       - name: Update image tags in 12-prob-deployments.yaml
         run: |
           VERSION=${{ github.run_number }}
           ECR_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}
           FILE=k8s/12-prob-deployments.yaml
-          for svc in proxy-frontend load-generator; do
-            sed -i "s|image: .*${svc}.*|image: ${ECR_URI}:${svc}-${VERSION}|" $FILE
+          for svc in frontend-proxy; do
+            sed -i "s|image: .*${svc}.*|image: ${ECR_URI}:proxy-frontend-44|" $FILE
           done
 
       - name: Commit and push updated deployments file
