@@ -90,13 +90,13 @@ jobs:
             sed -i "s|image: frontend-proxy:.*|image: ${ECR_URI}:${svc}-44|" $FILE
           done
 
-      # - name: Commit and push updated deployments file
-      #   run: |
-      #     git config --global user.name "arbaaz29"
-      #     git config --global user.email "arbazij@gmail.com"
-      #     git add k8s/.
-      #     git commit -m "Update image in k8s to run ${{ github.run_number }}"
-      #     git push
+      - name: Commit and push updated deployments file
+        run: |
+          git config --global user.name "arbaaz29"
+          git config --global user.email "arbazij@gmail.com"
+          git add k8s/.
+          git commit -m "Update image in k8s to run ${{ github.run_number }}"
+          git push
 
       # - name: Update image tags in 07-deployments.yaml(Failure)
       #   run: |
