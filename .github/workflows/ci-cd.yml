@@ -68,7 +68,16 @@ jobs:
           VERSION=${{ github.run_number }}
           ECR_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}
           FILE=k8s/07-deployments.yaml
-          for svc in frontend-proxy product-catalog image-provider fraud-detection load-generator flagd-ui frontend checkout payment recommendation email currency shipping ad cart accounting quote kafka; do
+          for svc in frontend checkout payment recommendation email currency shipping ad cart accounting quote product-catalog image-provider fraud-detection flagd-ui kafka; do
+            sed -i "s|image: .*${svc}.*|image: ${ECR_URI}:${svc}-${VERSION}|" $FILE
+          done
+      
+      - name: Update image tags in 12-prob-deployments.yaml
+        run: |
+          VERSION=${{ github.run_number }}
+          ECR_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}
+          FILE=k8s/12-deployments.yaml
+          for svc in frontend-proxy load-generator; do
             sed -i "s|image: .*${svc}.*|image: ${ECR_URI}:${svc}-${VERSION}|" $FILE
           done
 
@@ -84,15 +93,16 @@ jobs:
         run: |
           git config --global user.name "arbaaz29"
           git config --global user.email "arbazij@gmail.com"
-          git add k8s/07-deployments.yaml
+          git add k8s/.
           git commit -m "Update image tags in 07-deployments.yaml for run ${{ github.run_number }}"
           git push
+
       # - name: Update image tags in 07-deployments.yaml(Failure)
       #   run: |
       #     ECR_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}
       #     FILE=k8s/07-deployments.yaml
       #      for svc in frontend checkout payment email currency product-catalog shipping ad cart accounting fraud-detection quote image-provider load-generator flagd-ui kafka; do
-      #       sed -i "s|image: .*${svc}.*|image: ${ECR_URI}:${svc}-${{ github.run_number }}|" $FILE
+      #       sed -i "s|image: .*${svc}.*|image: ${ECR_URI}:${svc}-${{ github.sha }}|" $FILE
       #     done
 
       #     sed -i "s|image: .*recommendation.*|image: ${ECR_URI}:recommendation-INVALIDTAG|" $FILE
