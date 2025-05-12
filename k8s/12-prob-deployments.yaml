@@ -31,7 +31,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: frontend-proxy
-          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:proxy-frontend-44
+          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:proxy-frontend-50
           imagePullPolicy: IfNotPresent
           ports:
             
@@ -127,7 +127,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: load-generator
-          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:load-generator-44
+          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:load-generator-50
           imagePullPolicy: IfNotPresent
           ports:
             

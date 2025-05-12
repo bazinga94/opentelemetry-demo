@@ -140,7 +140,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: accounting
-          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:accounting-44
+          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:accounting-50
           imagePullPolicy: IfNotPresent
           env:
             - name: OTEL_SERVICE_NAME
@@ -203,7 +203,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: ad
-          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:ad-44
+          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:ad-50
           imagePullPolicy: IfNotPresent
           ports:
             
@@ -269,7 +269,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: cart
-          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:cart-44
+          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:cart-50
           imagePullPolicy: IfNotPresent
           ports:
             
@@ -345,7 +345,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: checkout
-          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:checkout-44
+          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:checkout-50
           imagePullPolicy: IfNotPresent
           ports:
             
@@ -430,7 +430,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: currency
-          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:currency-44
+          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:currency-50
           imagePullPolicy: IfNotPresent
           ports:
             
@@ -492,7 +492,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: email
-          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:email-44
+          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:email-50
           imagePullPolicy: IfNotPresent
           ports:
             
@@ -594,7 +594,7 @@ spec:
             - name: config-rw
               mountPath: /etc/flagd
         - name: flagd-ui
-          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:flagd-ui-44
+          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:flagd-ui-50
           imagePullPolicy: IfNotPresent
           ports:
             
@@ -673,7 +673,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: fraud-detection
-          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:fraud-detection-44
+          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:fraud-detection-50
           imagePullPolicy: IfNotPresent
           env:
             - name: OTEL_SERVICE_NAME
@@ -740,7 +740,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: frontend
-          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:frontend-44
+          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:frontend-50
           imagePullPolicy: IfNotPresent
           ports:
             
@@ -831,7 +831,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: image-provider
-          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:image-provider-44
+          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:image-provider-50
           imagePullPolicy: IfNotPresent
           ports:
             
@@ -893,7 +893,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: kafka
-          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:kafka-44
+          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:kafka-50
           imagePullPolicy: IfNotPresent
           ports:
             
@@ -961,7 +961,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: payment
-          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:payment-44
+          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:payment-50
           imagePullPolicy: IfNotPresent
           ports:
             
@@ -1029,7 +1029,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: product-catalog
-          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:product-catalog-44
+          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:product-catalog-50
           imagePullPolicy: IfNotPresent
           ports:
             
@@ -1100,7 +1100,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: quote
-          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:quote-44
+          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:quote-50
           imagePullPolicy: IfNotPresent
           ports:
             
@@ -1166,7 +1166,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: recommendation
-          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:recommendation-44
+          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:recommendation-50
           imagePullPolicy: IfNotPresent
           ports:
             
@@ -1236,7 +1236,7 @@ spec:
       serviceAccountName: opentelemetry-demo
       containers:
         - name: shipping
-          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:shipping-44
+          image: 588738579349.dkr.ecr.us-east-1.amazonaws.com/group6/otel-demo:shipping-50
           imagePullPolicy: IfNotPresent
           ports:
             
